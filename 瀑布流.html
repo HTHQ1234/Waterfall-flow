@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      list-style: none;
+    }
+
+    #box {
+      margin: 0 auto;
+      width: 700px;
+    }
+
+    ul {
+      width: 200px;
+      float: left;
+      margin: 0 auto;
+      margin-right: 10px;
+    }
+
+    img {
+      width: 200px;
+      padding-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="box">
+    <ul></ul>
+    <ul></ul>
+    <ul></ul>
+  </div>
+
+  <script src="./瀑布流.js"></script>
+  <script>
+    window.onload = function () {
+      //获取页面元素
+      var oBox = document.querySelector('#box');
+      var oUl = document.querySelectorAll('ul');
+      var vH = document.documentElement.clientHeight; //获取可视高度
+      //求出最小高度的列
+      function min_height(oUl) {
+        var ht = oUl[0].offsetHeight;
+        var index = 0;
+        for (var i = 0; i < oUl.length; i++) {
+          if (oUl[i].offsetHeight < ht) {
+            ht = oUl[i].offsetHeight;
+            index = i;
+          }
+        }
+        return index;
+      }
+      loadImg();
+      //加载图片
+      function loadImg() {
+        ajax('http://localhost/json/%E7%80%91%E5%B8%83%E6%B5%81.json', function (data) {
+          data = (new Function('return' + data))();
+          //这种方式能将字符串解析成json对象(new Function("","return "+json))();
+          for (var i = 0; i < data.length; i++) {
+            var oLi = document.createElement('li');
+            var oImg = document.createElement('img');
+            oImg.src = data[i];
+            oLi.appendChild(oImg);
+            oUl[min_height(oUl)].appendChild(oLi);
+          }
+        });
+      }
+
+      document.onscroll = function () { //鼠标在当前页面上滚动事件
+        var sH = document.documentElement.scrollTop || document.body.scrollTop;
+        //document.documentElement.scrollTop为获取滚动条位置，document.body.scrollTop给谷歌做兼容
+        if (sH + vH >= document.body.scrollHeight * 0.9) {
+          //document.body.scrollHeight为到当前页面可滚动的总高度
+          loadImg();
+        }
+      }
+      setInterval(() => {
+        console.log(document.documentElement.scrollTop || document.body.scrollTop);
+        console.log(vH);
+      }, 1500);
+
+    }
+  </script>
+</body>
+
+</html>
